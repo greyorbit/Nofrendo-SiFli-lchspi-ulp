@@ -1,0 +1,8 @@
+import os
+from building import *
+
+# Add source code
+src = Glob("*.c")
+
+group = DefineGroup("Porting", src, depend=[""])
+Return("group")

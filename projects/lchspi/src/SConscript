@@ -1,0 +1,25 @@
+import os
+from building import *
+
+cwd = GetCurrentDir()
+
+
+# Add source code
+src = Glob("*.c")
+include_path = [
+    cwd,
+    cwd + "/../../../src/",
+]
+
+porting_objs = SConscript(
+    cwd + "/porting/SConscript", variant_dir="porting", duplicate=0
+)
+src.extend(porting_objs)
+
+nofrendo_objs = SConscript(
+    cwd + "/../../../src/nofrendo/SConscript", variant_dir="nofrendo", duplicate=0
+)
+src.extend(nofrendo_objs)
+
+group = DefineGroup("Applications", src, depend=[""], CPPPATH=include_path)
+Return("group")

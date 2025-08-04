@@ -1,0 +1,10 @@
+#APP specific configuration.
+config CUSTOM_MEM_MAP
+    bool 
+	select custom_mem_map
+	default y if !SOC_SIMULATOR
+
+config LCD_USE_GPIO_TE
+    int
+    depends on LCD_USING_ILI8688E_DSI
+    default 114
