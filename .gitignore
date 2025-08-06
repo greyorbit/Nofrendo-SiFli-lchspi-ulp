@@ -1,4 +1,8 @@
 .vscode/
+build*/
+__pycache__/
+.sconsign.dblite
+*.tmp
 # Prerequisites
 *.d
 

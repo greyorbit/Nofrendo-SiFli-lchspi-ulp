@@ -141,12 +141,6 @@ int main() {
     WriteFile(hSerial, &key, 1, &bytesWritten, NULL);
     key = 0;
 
-    // char rxBuffer[1024];
-    // DWORD bytesRead;
-    // ReadFile(hSerial, rxBuffer, sizeof(rxBuffer), &bytesRead, NULL);
-    // rxBuffer[bytesRead] = '\0'; // 添加字符串结束符
-    // printf("Received: %s\n", rxBuffer);
-
     for (size_t i = 0; i < 8; i++) {
         printf("%s\n", keyMapHelp[i]);
     }

@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 #include <rtthread.h>
+#include <rtdef.h>
 #include <rtdevice.h>
+#include <mem_section.h>
 #include "bf0_hal.h"
 #include <stdlib.h>
 #include <math.h>
@@ -21,20 +23,33 @@
 #include "nofrendo/nofconfig.h"
 #include "nofrendo/osd.h"
 
-extern const viddriver_t videoDriver;
-extern void osd_inputInit(void);
+#define OSD_HEAP_SIZE (1024 * 1024 * 7)
 /* ----------------------------------------------------------------------------
  * function declaration
  * ---------------------------------------------------------------------------*/
-
+extern const viddriver_t videoDriver;
+extern void osd_inputInit(void);
 /* ----------------------------------------------------------------------------
  * variable define
  * ---------------------------------------------------------------------------*/
 static struct rt_timer osdTimer;
 static void (*timer_callback)(void) = NULL;
+struct rt_memheap osd_heap;
+L2_RET_BSS_SECT_BEGIN(app_psram_ret_cache)
+ALIGN(4) uint8_t osd_heap_mem[OSD_HEAP_SIZE] L2_RET_BSS_SECT(app_psram_ret_cache);
+L2_RET_BSS_SECT_END
 /* ----------------------------------------------------------------------------
  * function define
  * ---------------------------------------------------------------------------*/
+static int osd_heap_init(void) {
+    rt_err_t ret = rt_memheap_init(&osd_heap, "osd_heap", (void *)osd_heap_mem, OSD_HEAP_SIZE);
+    if (ret != RT_EOK) {
+        printf("osd_heap_init failed, ret=%d\n", ret);
+    }
+    return ret;
+}
+INIT_PREV_EXPORT(osd_heap_init);
+
 static void osd_timer_expiry(void *dummy) {
     if (timer_callback)
         timer_callback();
@@ -46,7 +61,8 @@ static int logprint(const char *string) {
 
 extern void *mem_alloc(int size, bool prefer_fast_memory) {
     void *addr;
-    addr = malloc(size);
+    // addr = malloc(size);
+    addr = rt_memheap_alloc(&osd_heap, size);
     if (addr != NULL) {
         // printf("malloc %d bytes at %p\n", size, addr);
     } else {
@@ -57,8 +73,9 @@ extern void *mem_alloc(int size, bool prefer_fast_memory) {
 }
 
 extern void *mem_free(void *addr) {
-    free(addr);
-    // printf("free %p\n", addr);
+    rt_memheap_free(addr);
+    // free(addr);
+    //  printf("free %p\n", addr);
 }
 
 extern void osd_setsound(void (*playfunc)(void *buffer, int size)) {
@@ -70,6 +87,7 @@ extern void osd_getsoundinfo(sndinfo_t *info) {
 }
 
 extern int osd_init(void) {
+    printf("osd init\n");
     nofrendo_log_chain_logfunc(logprint);
     osd_inputInit();
     return 0;

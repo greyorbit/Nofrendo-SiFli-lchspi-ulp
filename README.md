@@ -6,3 +6,6 @@ Nofrendo for SiFli lchspi-ulp (立创·黄山派 SF32LB52开发板)
 2. build and download the FW to the SiFli-lchspi-ulp DK
 3. open the projects\joystick\joystick.exe
 
+# To Do List
+- [ ] ​1. ​Implement Audio Support​​ 
+- [ ] ​2. ​Implement Full-Screen Support​

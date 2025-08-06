@@ -13,6 +13,7 @@
 #include "nofrendo/nes/nesinput.h"
 #include "nofrendo/nofconfig.h"
 #include "nofrendo/osd.h"
+
 /* ----------------------------------------------------------------------------
  * function declaration
  * ---------------------------------------------------------------------------*/
@@ -25,6 +26,9 @@ static rt_device_t lcd_device;
 static struct rt_device_graphic_info lcd_info;
 static char fb[1]; // dummy
 bitmap_t *myBitmap;
+
+static uint16_t nesFrameBuf[NES_SCREEN_HEIGHT * NES_SCREEN_WIDTH];
+static uint16_t myPalette[256];
 /* ----------------------------------------------------------------------------
  * function define
  * ---------------------------------------------------------------------------*/
@@ -82,7 +86,6 @@ static int osd_videoSetMode(int width, int height) {
 }
 
 /* copy nes palette over to hardware */
-uint16 myPalette[256];
 static void osd_videoSetPalette(rgb_t *pal) {
     for (int i = 0; i < 256; i++) {
         myPalette[i] = (pal[i].b >> 3) + ((pal[i].g >> 2) << 5) + ((pal[i].r >> 3) << 11);
@@ -107,7 +110,6 @@ static void osd_videoFreeWrite(int num_dirties, rect_t *dirty_rects) {
     }
 }
 
-static uint16_t nesFrameBuf[NES_SCREEN_HEIGHT * NES_SCREEN_WIDTH];
 static void osd_videoCustomBlit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 
     // printf("custom_blit num_dirties %d\n", num_dirties);
@@ -140,7 +142,7 @@ static void osd_videoCustomBlit(bitmap_t *bmp, int num_dirties, rect_t *dirty_re
     }
 }
 
-const viddriver_t videoDriver = {
+static viddriver_t videoDriver = {
     "Sifli LCD",         /* name */
     osd_videoInit,       /* init */
     osd_videoShutdown,   /* shutdown */
